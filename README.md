@@ -1,11 +1,21 @@
-# BundesFAQ-Chatbot - Mehdi's Branch
+# BundesFAQ-Chatbot
 
-This is Mehdi's development branch for the BundesFAQ-Chatbot project.
+Welcome to the BundesFAQ-Chatbot project!
 
-## About This Branch
+## About
 
-This branch contains my personal development work and contributions to the BundesFAQ-Chatbot project.
+This is the main repository for the BundesFAQ-Chatbot project.
+
+## Branches
+
+- **main** - Main/production branch
+- **Mehdi** - Mehdi's development branch  
+- **soufiane_dev** - Soufiane's development branch
+
+## Getting Started
+
+Clone this repository and switch to your development branch to start working.
 
 ---
 
-*Created on September 19, 2025*
+*Project created on September 19, 2025*
