@@ -1,3 +1,5 @@
+
+# Backend requirements
 langchain
 langchain-groq
 faiss-cpu
