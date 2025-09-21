@@ -1,103 +1,15 @@
 # Environment variables
 .env
-.env.local
-.env.development
-.env.test
-.env.production
 
 # Python
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+*.pyc
 
 # Virtual environments
 .venv/
-venv/
-ENV/
-env/
-.virtualenv/
 
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# ChromaDB and vector databases
+# ChromaDB
 chroma_db/
-*.chroma
-.chromadb/
-chroma_cache/
-
-# IDE
-.vscode/settings.json
-.vscode/launch.json
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Logs
-*.log
-logs/
-
-# Temporary files
-*.tmp
-*.temp
-temp/
-tmp/
-
-# Node modules (if any)
-node_modules/
-
-# Package files
-*.7z
-*.dmg
-*.gz
-*.iso
-*.jar
-*.rar
-*.tar
-*.zip
-
-# API Keys and secrets
-secrets.json
-config.json
-credentials.json
-
-# Data files (optional - remove if you want to track data)
-# data/
-# *.csv
-# *.json
-# *.txt
-
-# Model files
-*.pkl
-*.joblib
-*.h5
-*.model
