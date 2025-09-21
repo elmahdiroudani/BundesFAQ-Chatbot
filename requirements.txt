@@ -1,25 +1,7 @@
 langchain
-langchain-groq
-faiss-cpu
-tiktoken
 langchain-community
 langchain-openai
 chromadb
-sentence-transformers
+tiktoken
 python-dotenv
-pypdf
-pymupdf
-unstructured
 pandas
-jq
-matplotlib
-## Embeddings
-langchain-huggingface
-sentence-transformers
-langchain-experimental
-rank_bm25
-
-
-
-
-
