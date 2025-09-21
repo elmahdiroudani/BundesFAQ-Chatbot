@@ -1,15 +1,6 @@
-# Environment variables
 .env
-
-# Python
 __pycache__/
 *.pyc
-
-# Virtual environments
 .venv/
-
-# Jupyter Notebook
 .ipynb_checkpoints
-
-# ChromaDB
 chroma_db/
