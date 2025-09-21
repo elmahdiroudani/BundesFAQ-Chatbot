@@ -1,7 +1,12 @@
+fastapi
+uvicorn[standard]
+pydantic
+requests
 langchain
 langchain-community
+langchain-core
 langchain-openai
 chromadb
-tiktoken
 python-dotenv
+tiktoken
 pandas
