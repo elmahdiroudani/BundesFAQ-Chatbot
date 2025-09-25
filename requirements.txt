@@ -1,3 +1,4 @@
+## Unified backend requirements (merged)
 fastapi
 uvicorn[standard]
 pydantic
