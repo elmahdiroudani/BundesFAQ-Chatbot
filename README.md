@@ -97,6 +97,35 @@ Your backend should implement these endpoints:
 
 See `BACKEND_INTEGRATION.md` for detailed API specifications.
 
+### Rebuild / Update Vectorstore
+Use the helper script to (re)generate the Chroma vectorstore from the provided PDF or text export.
+
+```bash
+# From repository root
+python backend/scripts/build_vectorstore.py --pdf backend/data/faq.pdf --reset
+
+# Or from text version
+python backend/scripts/build_vectorstore.py --text backend/data/FAQtxt.txt --reset
+
+# Custom output directory
+VECTORSTORE_DIR=./backend/vectorstore_alt \
+python backend/scripts/build_vectorstore.py --pdf backend/data/faq.pdf
+```
+
+Flags:
+- `--reset`  Wipes existing directory before building
+- `--pdf` / `--text`  Exactly one is required
+- `--out`  Override output directory (else uses VECTORSTORE_DIR or default)
+
+The API (`app.py`) will pick up the vectorstore from:
+```
+VECTORSTORE_DIR env var OR ./backend/vectorstore (default)
+```
+
+If you previously had a legacy store under `src/backend/chroma_db/…`, its
+contents are no longer used after the restructure—rebuild using the script
+above to ensure consistency.
+
 ## � API & Integration (Consolidated)
 
 The frontend expects these core backend endpoints (planned):
