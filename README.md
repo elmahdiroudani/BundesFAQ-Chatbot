@@ -13,25 +13,40 @@ A modern, responsive chatbot for German federal laws and regulations, built with
 - **Chat History** - Persistent conversation management
 - **Real-time Streaming** - Streaming chat responses
 
-## 📁 Project Structure
+## 📁 Project Structure (After Restructure)
 
 ```
 BundesFAQ-Chatbot/
-├── src/
-│   ├── backend/           # Backend implementation (to be developed)
-│   └── frontend/          # React TypeScript frontend
-│       ├── src/
-│       │   ├── components/  # React components
-│       │   ├── pages/      # App pages
-│       │   ├── api/        # API integration
-│       │   └── assets/     # Static assets
-│       ├── package.json    # Frontend dependencies
-│       └── vite.config.ts  # Build configuration
-├── data/                  # Data files and datasets
-├── requirements.txt       # Python dependencies
-├── pyproject.toml         # Project configuration
-└── main.py               # Application entry point
+├── backend/
+│   ├── app.py                # FastAPI application (RAG endpoints)
+│   ├── main.py               # CLI / entrypoint helper (legacy info banner)
+│   ├── chat_terminal.py      # Simple terminal client
+│   ├── requirements.txt      # Python dependencies (moved here)
+│   ├── pyproject.toml        # (optional packaging / uv config)
+│   ├── uv.lock               # uv lockfile
+│   ├── data/                 # Source & processed FAQ data
+│   ├── vectorstore/          # Chroma persistence (new path)
+│   ├── vectorstore_src/      # Original copied vectorstore (evaluation, ignored)
+│   └── notebooks/
+│       └── faq_rag_semantic_chunking.ipynb
+├── frontend/                 # React + Vite + TS application
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+│   ├── index.html
+│   ├── public/
+│   └── src/
+│       ├── components/
+│       ├── pages/
+│       ├── api/
+│       ├── i18n/
+│       └── assets/
+├── README.md                 # Root documentation (this file)
+├── LICENSE
+└── .gitignore
 ```
+
+Legacy `src/` directory has been flattened: former `src/frontend` merged into top-level `frontend/`; backend code centralized in `backend/`.
 
 ## 🛠️ Installation & Setup
 
@@ -44,34 +59,30 @@ BundesFAQ-Chatbot/
 ### Frontend Setup
 
 ```bash
-# Install frontend dependencies
-cd src/frontend
+cd frontend
 npm install
-
-# Start development server
-npm run dev
-# Opens on http://127.0.0.1:5173/
-
-# Build for production
-npm run build
-# Outputs to src/backend/static/
+npm run dev          # http://127.0.0.1:5173/
+npm run build        # (adjust dist handling as needed)
 ```
 
 ### Backend Setup
 
 ```bash
-# Install Python dependencies
-pip install -r requirements.txt
+cd backend
+pip install -r requirements.txt   # or: uv pip install -r requirements.txt
 
-# Run main application
-python main.py
+# Run FastAPI (dev)
+uvicorn app:app --reload --port 8000
+
+# Terminal client (optional)
+python chat_terminal.py
 ```
 
 ## 🔧 Development
 
 ### Frontend Development
 ```bash
-cd src/frontend
+cd frontend
 npm run dev
 ```
 The frontend runs on port 5173 and proxies API calls to port 50505.
@@ -86,11 +97,40 @@ Your backend should implement these endpoints:
 
 See `BACKEND_INTEGRATION.md` for detailed API specifications.
 
-## 📚 Documentation
+## � API & Integration (Consolidated)
 
-- **[Backend Integration Guide](BACKEND_INTEGRATION.md)** - Complete API specification
-- **[Frontend Documentation](src/frontend/README.md)** - Frontend-specific docs
-- **[Frontend Fixes](FRONTEND_FIXED.md)** - Recent issue resolutions
+The frontend expects these core backend endpoints (planned):
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/health` | GET | Basic service + vectorstore status |
+| `/chat` | POST | RAG answer to a user question (current implementation) |
+| `/config` | GET | UI feature toggles (to implement) |
+| `/auth_setup` | GET | Authentication configuration (optional) |
+| `/ask` | POST | Single-shot Q&A (future) |
+| `/chat/stream` | POST | Streaming responses (future) |
+| `/upload` | POST | Upload documents (optional) |
+
+### Example `/config` Response (planned)
+```json
+{
+	"showVectorOption": true,
+	"streamingEnabled": true,
+	"showLanguagePicker": true,
+	"ragSearchTextEmbeddings": true
+}
+```
+
+### Chat Request Schema (planned `/ask` / `/chat/stream`)
+```json
+{
+	"messages": [{"role": "user", "content": "Was ist GovData.de?"}],
+	"context": {"overrides": {"retrieval_mode": "hybrid", "top": 3, "language": "de"}},
+	"session_state": null
+}
+```
+
+All prior integration and fixes documents (`BACKEND_INTEGRATION.md`, `FRONTEND_FIXED.md`, `PROJECT_READY.md`, frontend/README) have been merged into this single README for clarity.
 
 ## 🤝 Contributing
 
@@ -111,14 +151,15 @@ See `BACKEND_INTEGRATION.md` for detailed API specifications.
 
 ## 🚀 Deployment
 
-### Production Build
+### Production Build (Draft)
 ```bash
-# Build frontend
-cd src/frontend
+# Frontend
+cd frontend
 npm run build
 
-# Frontend assets will be in src/backend/static/
-# Deploy backend with built frontend assets
+# Backend (ensure VECTORSTORE_DIR set if custom)
+cd ../backend
+uvicorn app:app --host 0.0.0.0 --port 8000
 ```
 
 ### Environment Variables

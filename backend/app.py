@@ -50,7 +50,8 @@ else:
 
 embedding = OpenAIEmbeddings(model="text-embedding-3-small")
 
-persist_directory = "./src/backend/chroma_db"
+# Default Chroma persistence now lives in backend/vectorstore (configurable via VECTORSTORE_DIR)
+persist_directory = os.getenv("VECTORSTORE_DIR", "./backend/vectorstore")
 
 if not os.path.exists(persist_directory):
     logger.warning(f"ChromaDB directory not found: {persist_directory}")
