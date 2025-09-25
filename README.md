@@ -18,15 +18,13 @@ A modern, responsive chatbot for German federal laws and regulations, built with
 ```
 BundesFAQ-Chatbot/
 ├── backend/
-│   ├── app.py                # FastAPI application (RAG endpoints)
-│   ├── main.py               # CLI / entrypoint helper (legacy info banner)
+│   ├── app.py                # FastAPI application (RAG endpoints + stubs)
 │   ├── chat_terminal.py      # Simple terminal client
 │   ├── requirements.txt      # Python dependencies (moved here)
 │   ├── pyproject.toml        # (optional packaging / uv config)
 │   ├── uv.lock               # uv lockfile
 │   ├── data/                 # Source & processed FAQ data
-│   ├── vectorstore/          # Chroma persistence (new path)
-│   ├── vectorstore_src/      # Original copied vectorstore (evaluation, ignored)
+│   ├── vectorstore/          # Chroma persistence (active)
 │   └── notebooks/
 │       └── faq_rag_semantic_chunking.ipynb
 ├── frontend/                 # React + Vite + TS application
@@ -126,21 +124,21 @@ If you previously had a legacy store under `src/backend/chroma_db/…`, its
 contents are no longer used after the restructure—rebuild using the script
 above to ensure consistency.
 
-## � API & Integration (Consolidated)
+## 🧩 API & Integration
 
-The frontend expects these core backend endpoints (planned):
+Implemented & planned endpoints:
 
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
-| `/health` | GET | Basic service + vectorstore status |
-| `/chat` | POST | RAG answer to a user question (current implementation) |
-| `/config` | GET | UI feature toggles (to implement) |
-| `/auth_setup` | GET | Authentication configuration (optional) |
-| `/ask` | POST | Single-shot Q&A (future) |
-| `/chat/stream` | POST | Streaming responses (future) |
-| `/upload` | POST | Upload documents (optional) |
+| `/health` | GET | Service + Vectorstore + Modellstatus |
+| `/chat` | POST | RAG Antwort auf Nutzerfrage |
+| `/config` | GET | UI Feature Flags (Stub) |
+| `/auth_setup` | GET | Auth Konfiguration (Stub) |
+| `/ask` | POST | Vereinfachtes Q&A (Alias) |
+| `/chat/stream` | POST | Token-Streaming (Stub) |
+| `/upload` | POST | Datei-Upload (501 / not implemented) |
 
-### Example `/config` Response (planned)
+### Example `/config` Response
 ```json
 {
 	"showVectorOption": true,
@@ -150,7 +148,7 @@ The frontend expects these core backend endpoints (planned):
 }
 ```
 
-### Chat Request Schema (planned `/ask` / `/chat/stream`)
+### Chat Request Schema (`/chat` / `/ask`)
 ```json
 {
 	"messages": [{"role": "user", "content": "Was ist GovData.de?"}],
@@ -159,7 +157,27 @@ The frontend expects these core backend endpoints (planned):
 }
 ```
 
-All prior integration and fixes documents (`BACKEND_INTEGRATION.md`, `FRONTEND_FIXED.md`, `PROJECT_READY.md`, frontend/README) have been merged into this single README for clarity.
+All prior integration documents have been merged into this single README for clarity.
+
+## 🔐 Environment Variables
+
+Create a local `.env` (see `.env.example`):
+```
+OPENAI_API_KEY=your_real_key
+VECTORSTORE_DIR=./backend/vectorstore
+MODEL=gpt-3.5-turbo
+EMBED_MODEL=text-embedding-3-small
+LOG_LEVEL=INFO
+```
+
+Optional (Azure / Auth / DB):
+```
+AZURE_OPENAI_ENDPOINT=...
+AZURE_OPENAI_API_KEY=...
+AZURE_CLIENT_ID=...
+AZURE_TENANT_ID=...
+DATABASE_URL=...
+```
 
 ## 🤝 Contributing
 
