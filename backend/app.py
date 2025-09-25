@@ -51,6 +51,7 @@ else:
 embedding = OpenAIEmbeddings(model="text-embedding-3-small")
 
 # Default Chroma persistence now lives in backend/vectorstore (configurable via VECTORSTORE_DIR)
+# Location of the Chroma vectorstore. Override via env VAR VECTORSTORE_DIR if deploying elsewhere.
 persist_directory = os.getenv("VECTORSTORE_DIR", "./backend/vectorstore")
 
 if not os.path.exists(persist_directory):
