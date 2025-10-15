@@ -28,17 +28,17 @@ export default defineConfig({
     },
     server: {
         proxy: {
-            "/content/": "http://localhost:50505",
-            "/auth_setup": "http://localhost:50505",
-            "/.auth/me": "http://localhost:50505",
-            "/ask": "http://localhost:50505",
-            "/chat": "http://localhost:50505",
-            "/speech": "http://localhost:50505",
-            "/config": "http://localhost:50505",
-            "/upload": "http://localhost:50505",
-            "/delete_uploaded": "http://localhost:50505",
-            "/list_uploaded": "http://localhost:50505",
-            "/chat_history": "http://localhost:50505"
+            "/content/": "http://127.0.0.1:8000",
+            "/auth_setup": "http://127.0.0.1:8000",
+            "/.auth/me": "http://127.0.0.1:8000",
+            "/ask": "http://127.0.0.1:8000",
+            "/chat": "http://127.0.0.1:8000",
+            "/speech": "http://127.0.0.1:8000",
+            "/config": "http://127.0.0.1:8000",
+            "/upload": "http://127.0.0.1:8000",
+            "/delete_uploaded": "http://127.0.0.1:8000",
+            "/list_uploaded": "http://127.0.0.1:8000",
+            "/chat_history": "http://127.0.0.1:8000"
         }
     }
 });

@@ -158,8 +158,8 @@ class Config(BaseModel):
     showReasoningEffortOption: bool = False
     streamingEnabled: bool = True
     showVectorOption: bool = True
-    showUserUpload: bool = True
-    showLanguagePicker: bool = True
+    showUserUpload: bool = False  # Deaktiviert
+    showLanguagePicker: bool = False  # Deaktiviert - nur Deutsch
     showSpeechInput: bool = False
     showSpeechOutputBrowser: bool = False
     showSpeechOutputAzure: bool = False
