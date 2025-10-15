@@ -2,10 +2,10 @@
     "pageTitle": "BundesFAQ Chatbot",
     "headerTitle": "BundesFAQ Chatbot",
     "chat": "Chat",
-    "qa": "Ask a question",
+    "qa": "Frage stellen",
     "login": "Login",
     "logout": "Logout",
-    "clearChat": "Clear chat",
+    "clearChat": "Chat löschen",
     "history": {
         "chatHistory": "Chat history",
         "openChatHistory": "Open chat history",
@@ -34,15 +34,15 @@
     },
     "developerSettings": "Developer settings",
 
-    "chatEmptyStateTitle": "Chat with your data",
-    "chatEmptyStateSubtitle": "Ask anything or try an example",
+    "chatEmptyStateTitle": "Chatten Sie mit der BundesFAQ",
+    "chatEmptyStateSubtitle": "Stellen Sie eine Frage oder probieren Sie ein Beispiel",
     "defaultExamples": {
-        "1": "What is included in my Northwind Health Plus plan that is not in standard?",
-        "2": "What happens in a performance review?",
-        "3": "What does a Product Manager do?",
-        "placeholder": "Type a new question (e.g. does my plan cover annual eye exams?)"
+        "1": "Was ist GovData.de und welche Daten sind verfügbar?",
+        "2": "Welche Lizenzen gibt es für offene Verwaltungsdaten?",
+        "3": "Wie kann ich offene Daten der Bundesregierung nutzen?",
+        "placeholder": "Stellen Sie eine neue Frage (z.B. Wie kann ich auf Bundesgesetze zugreifen?)"
     },
-    "askTitle": "Ask your data",
+    "askTitle": "Fragen Sie die BundesFAQ",
     "multimodalExamples": {
         "1": "Compare the impact of interest rates and GDP in financial markets.",
         "2": "What is the expected trend for the S&P 500 index over the next five years? Compare it to the past S&P 500 performance",

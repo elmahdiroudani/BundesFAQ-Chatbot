@@ -163,7 +163,7 @@ class Config(BaseModel):
     showSpeechInput: bool = False
     showSpeechOutputBrowser: bool = False
     showSpeechOutputAzure: bool = False
-    showChatHistoryBrowser: bool = True
+    showChatHistoryBrowser: bool = False  # Deaktiviert
     showChatHistoryCosmos: bool = False
     showAgenticRetrievalOption: bool = False
     ragSearchTextEmbeddings: bool = True
@@ -180,9 +180,10 @@ class HealthResponse(BaseModel):
 def generate_followup_questions(answer: str) -> List[str]:
     """Generate follow-up questions based on the answer"""
     followup_questions = [
-        "Können Sie mehr Details dazu erklären?",
-        "Gibt es weitere Informationen zu diesem Thema?",
-        "Welche rechtlichen Aspekte sind wichtig?"
+        "Gibt es weitere Details zu diesem Thema?",
+        "Welche gesetzlichen Grundlagen sind relevant?",
+        "Wie kann ich diese Informationen praktisch nutzen?",
+        "Wo finde ich weiterführende Ressourcen dazu?"
     ]
     return followup_questions
 
@@ -265,6 +266,11 @@ async def ask(request: ChatAppRequest):
         logger.error(f"Error processing ask request: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
+@app.post("/chat", response_model=ChatAppResponse, tags=["Chat"])
+async def chat(request: ChatAppRequest):
+    """Non-streaming chat endpoint (same as /ask)"""
+    return await ask(request)
+
 @app.post("/chat/stream", tags=["Chat"])
 async def chat_stream(request: ChatAppRequest):
     """Streaming chat endpoint"""
@@ -295,34 +301,42 @@ async def chat_stream(request: ChatAppRequest):
                 # Generate follow-up questions
                 followup_questions = generate_followup_questions(answer)
                 
-                # Stream the answer word by word
+                # First, send initial chunk with context AND data_points
+                initial_chunk = {
+                    "context": {
+                        "data_points": {
+                            "text": sources,
+                            "images": [],
+                            "citations": sources
+                        }
+                    },
+                    "delta": {
+                        "content": "",
+                        "role": "assistant"
+                    }
+                }
+                yield f"{json.dumps(initial_chunk)}\n"
+                
+                # Stream the answer word by word with delta format
                 words = answer.split()
-                accumulated_content = ""
                 
                 for i, word in enumerate(words):
-                    accumulated_content += word + " "
-                    
-                    chunk_response = ChatAppResponse(
-                        message=ResponseMessage(content=accumulated_content.strip(), role="assistant"),
-                        delta=ResponseMessage(content=word + " ", role="assistant"),
-                        context=ResponseContext(
-                            data_points=DataPoints(
-                                text=sources if i == len(words) - 1 else [],
-                                images=[],
-                                citations=sources if i == len(words) - 1 else []
-                            ),
-                            followup_questions=followup_questions if i == len(words) - 1 else None,
-                            thoughts=[
-                                Thoughts(
-                                    title="Streaming Response",
-                                    description=f"Wort {i+1} von {len(words)}"
-                                )
-                            ] if i == 0 else []
-                        ),
-                        session_state=None
-                    )
-                    
-                    yield f"{json.dumps(chunk_response.model_dump())}\n"
+                    delta_chunk = {
+                        "delta": {
+                            "content": word + " ",
+                            "role": "assistant"
+                        }
+                    }
+                    yield f"{json.dumps(delta_chunk)}\n"
+                
+                # Send final chunk with follow-up questions
+                if followup_questions:
+                    final_chunk = {
+                        "context": {
+                            "followup_questions": followup_questions
+                        }
+                    }
+                    yield f"{json.dumps(final_chunk)}\n"
                     
             except Exception as e:
                 error_response = {
