@@ -6,6 +6,7 @@ langchain
 langchain-community
 langchain-core
 langchain-openai
+langchain-chroma
 chromadb
 python-dotenv
 tiktoken

@@ -1,8 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
@@ -95,24 +95,26 @@ else:
 
 # API Models
 class ChatRequest(BaseModel):
-    question: str
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {"question": "Was ist GovData.de?"}
         }
+    )
+    
+    question: str
 
 class ChatResponse(BaseModel):
-    answer: str
-    sources_count: int = 0
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "answer": "GovData.de ist das zentrale Metadatenportal für offene Verwaltungsdaten...",
                 "sources_count": 3
             }
         }
+    )
+    
+    answer: str
+    sources_count: int = 0
 
 class HealthResponse(BaseModel):
     status: str
@@ -149,7 +151,7 @@ async def chat(request: ChatRequest):
     try:
         response = rag_chain.invoke({"input": request.question})
 
-        docs = retriever.get_relevant_documents(request.question)
+        docs = retriever.invoke(request.question)
         sources_count = len(docs)
 
         return ChatResponse(
