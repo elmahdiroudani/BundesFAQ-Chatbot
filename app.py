@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_chroma import Chroma
 from langchain.chains import create_retrieval_chain
@@ -10,16 +10,13 @@ from langchain_core.prompts import ChatPromptTemplate
 import os
 import json
 import logging
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Any
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
-from enum import Enum
 
-# Setup Logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Lifespan Events
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("BundesFAQ RAG Chatbot API started")
@@ -27,7 +24,6 @@ async def lifespan(app: FastAPI):
     yield
     logger.info("BundesFAQ RAG Chatbot API stopped")
 
-#  Init FastAPI
 app = FastAPI(
     title="BundesFAQ RAG Chatbot API",
     description="RAG-basierter Chatbot für deutsche FAQ-Daten",
@@ -43,7 +39,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load ENV & Models
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -73,16 +68,11 @@ except Exception as e:
     vectorstore = None
     retriever = None
 
-# Prompt + LLM + Chain
-system_prompt = """You are a helpful assistant for question-answering tasks.  
-Use the retrieved context below to answer the user's question.  
-
-- If the answer is not in the context, say: "I don't know based on the provided documents."  
-- Be concise (max. 3 sentences).  
-- Ground your answer in the context, don't invent facts.  
-
-Context:
-{context}"""
+system_prompt = """Du bist ein hilfreicher Assistent für deutsche FAQ-Anfragen.
+Nutze den bereitgestellten Kontext, um die Frage zu beantworten.
+- Wenn die Antwort nicht im Kontext steht: "Ich weiß das nicht basierend auf den verfügbaren Dokumenten."
+- Sei präzise (max. 3 Sätze) und erfinde keine Fakten.
+Context: {context}"""
 
 prompt = ChatPromptTemplate.from_messages([
     ("system", system_prompt),
@@ -97,26 +87,10 @@ if retriever:
 else:
     rag_chain = None
 
-# API Models matching frontend expectations
-class RetrievalMode(str, Enum):
-    hybrid = "hybrid"
-    vectors = "vectors"
-    text = "text"
-
 class ChatAppRequestOverrides(BaseModel):
-    retrieval_mode: Optional[RetrievalMode] = None
-    semantic_ranker: Optional[bool] = None
-    query_rewriting: Optional[bool] = None
-    reasoning_effort: Optional[str] = "medium"
     temperature: Optional[float] = 0.1
     top: Optional[int] = 3
-    suggest_followup_questions: Optional[bool] = True
-    send_text_sources: bool = True
-    send_image_sources: bool = False
-    search_text_embeddings: bool = True
-    search_image_embeddings: bool = False
     language: str = "de"
-    use_agentic_retrieval: bool = False
 
 class ResponseMessage(BaseModel):
     content: str
@@ -151,32 +125,12 @@ class ChatAppResponse(BaseModel):
     session_state: Optional[Any] = None
 
 class Config(BaseModel):
-    defaultReasoningEffort: str = "medium"
-    showMultimodalOptions: bool = False
-    showSemanticRankerOption: bool = True
-    showQueryRewritingOption: bool = True
-    showReasoningEffortOption: bool = False
     streamingEnabled: bool = True
-    showVectorOption: bool = True
-    showUserUpload: bool = False  # Deaktiviert
-    showLanguagePicker: bool = False  # Deaktiviert - nur Deutsch
-    showSpeechInput: bool = False
-    showSpeechOutputBrowser: bool = False
-    showSpeechOutputAzure: bool = False
-    showChatHistoryBrowser: bool = False  # Deaktiviert
+    showUserUpload: bool = False
+    showLanguagePicker: bool = False
+    showChatHistoryBrowser: bool = False
     showChatHistoryCosmos: bool = False
-    showAgenticRetrievalOption: bool = False
-    ragSearchTextEmbeddings: bool = True
-    ragSearchImageEmbeddings: bool = False
-    ragSendTextSources: bool = True
-    ragSendImageSources: bool = False
 
-class HealthResponse(BaseModel):
-    status: str
-    vectorstore_loaded: bool
-    vectorstore_path: str
-
-# Helper functions
 def generate_followup_questions(answer: str) -> List[str]:
     """Generate follow-up questions based on the answer"""
     followup_questions = [
@@ -199,17 +153,11 @@ def create_chat_response(answer: str, sources: List[str], followup_questions: Li
                 citations=sources
             ),
             followup_questions=followup_questions,
-            thoughts=[
-                Thoughts(
-                    title="Recherche",
-                    description=f"Gefunden {len(sources)} relevante Dokumente in der Wissensdatenbank"
-                )
-            ]
+            thoughts=[]
         ),
         session_state=None
     )
 
-# API Routes
 @app.get("/", tags=["Root"])
 async def root():
     """Basis-Endpoint für API-Info"""
@@ -224,14 +172,14 @@ async def get_config():
     """Get configuration settings for the frontend"""
     return Config()
 
-@app.get("/health", response_model=HealthResponse, tags=["Health"])
+@app.get("/health", tags=["Health"])
 async def health_check():
     """Gesundheitscheck der API und ChromaDB"""
-    return HealthResponse(
-        status="healthy" if rag_chain else "degraded",
-        vectorstore_loaded=vectorstore is not None,
-        vectorstore_path=persist_directory
-    )
+    return {
+        "status": "healthy" if rag_chain else "degraded",
+        "vectorstore_loaded": vectorstore is not None,
+        "vectorstore_path": persist_directory
+    }
 
 @app.post("/ask", response_model=ChatAppResponse, tags=["Chat"])
 async def ask(request: ChatAppRequest):
@@ -243,21 +191,17 @@ async def ask(request: ChatAppRequest):
         )
     
     try:
-        # Get the last message content
         last_message = request.messages[-1] if request.messages else None
         if not last_message:
             raise HTTPException(status_code=400, detail="No messages provided")
         
         question = last_message.content
         
-        # Get response from RAG chain
         response = rag_chain.invoke({"input": question})
         
-        # Get source documents
         docs = retriever.invoke(question)
         sources = [doc.page_content[:200] + "..." for doc in docs]
         
-        # Generate follow-up questions
         followup_questions = generate_followup_questions(response["answer"])
         
         return create_chat_response(response["answer"], sources, followup_questions)
@@ -281,7 +225,6 @@ async def chat_stream(request: ChatAppRequest):
         )
     
     try:
-        # Get the last message content
         last_message = request.messages[-1] if request.messages else None
         if not last_message:
             raise HTTPException(status_code=400, detail="No messages provided")
@@ -290,18 +233,14 @@ async def chat_stream(request: ChatAppRequest):
         
         def generate_stream():
             try:
-                # Get response from RAG chain
                 response = rag_chain.invoke({"input": question})
                 answer = response["answer"]
                 
-                # Get source documents
                 docs = retriever.invoke(question)
                 sources = [doc.page_content[:200] + "..." for doc in docs]
                 
-                # Generate follow-up questions
                 followup_questions = generate_followup_questions(answer)
                 
-                # First, send initial chunk with context AND data_points
                 initial_chunk = {
                     "context": {
                         "data_points": {
@@ -317,7 +256,6 @@ async def chat_stream(request: ChatAppRequest):
                 }
                 yield f"{json.dumps(initial_chunk)}\n"
                 
-                # Stream the answer word by word with delta format
                 words = answer.split()
                 
                 for i, word in enumerate(words):
@@ -329,7 +267,6 @@ async def chat_stream(request: ChatAppRequest):
                     }
                     yield f"{json.dumps(delta_chunk)}\n"
                 
-                # Send final chunk with follow-up questions
                 if followup_questions:
                     final_chunk = {
                         "context": {
