@@ -152,6 +152,7 @@ temp/
 # Vectorstore persistence directories
 backend/vectorstore/
 backend/vectorstore_src/
+src/backend/chroma_db/
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints
